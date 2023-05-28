@@ -1,4 +1,5 @@
 ﻿using Nintendo.Byml.Collections;
+using SharpYaml.Tokens;
 using Syroot.BinaryData;
 using Syroot.BinaryData.Core;
 using System.Collections.Generic;
@@ -160,6 +161,7 @@ namespace Nintendo.Byml.IO
             {
                 NodeType.Array or NodeType.Hash or NodeType.StringArray => new BymlNode(reader.ReadUInt32()),// offset
                 NodeType.String => new BymlNode(StringArray.Array[reader.ReadInt32()].String),
+                NodeType.Embeded => ReadEmbeddedNode(reader, nodeType),
                 NodeType.Bool => new BymlNode(reader.ReadInt32() != 0),
                 NodeType.Int => new BymlNode(reader.ReadInt32()),
                 NodeType.Float => new BymlNode(reader.ReadSingle()),
@@ -179,15 +181,35 @@ namespace Nintendo.Byml.IO
             // Get node value
             dynamic value = nodeType switch
             {
-                NodeType.Int64 => reader.ReadInt64(),
-                NodeType.UInt64 => reader.ReadUInt64(),
-                NodeType.Double => reader.ReadDouble(),
+                NodeType.Int64 => new BymlNode(reader.ReadInt64()),
+                NodeType.UInt64 => new BymlNode(reader.ReadUInt64()),
+                NodeType.Double => new BymlNode(reader.ReadDouble()),
                 _ => throw new BymlException($"Unknown node type '{nodeType}'."),
             };
 
             // Reset position
             reader.Position = pos + 4;
 
+            return value;
+        }
+
+        private static BymlNode ReadEmbeddedNode(BinaryStream reader, NodeType nodeType)
+        {
+            ContainsEmbedded = true;
+            //Set position
+            var pos = reader.Position;
+            reader.Position = reader.ReadUInt32();
+
+            int datasize = reader.ReadInt32();
+            int dataoffset = reader.ReadInt32();
+            reader.Position = dataoffset;
+            byte[] FileData = reader.ReadBytes(datasize);
+            BymlNode value = new BymlNode(FileData, true);
+
+            // Reset position
+            reader.Position = pos + 4;
+
+            EmbeddedFiles.Add(value, FileData);
             return value;
         }
     }

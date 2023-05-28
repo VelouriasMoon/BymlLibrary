@@ -13,6 +13,8 @@ namespace Nintendo.Byml.Parser
     public class YamlConverter
     {
         private static Dictionary<string, BymlNode> ReferenceNodes { get; set; } = new Dictionary<string, BymlNode>();
+        private static bool ContainsEmbedded { get; set; } = false;
+        private static Dictionary<BymlNode, byte[]> EmbeddedFiles { get; set; } = new Dictionary<BymlNode, byte[]>();
 
         public static string ToYaml(BymlFile byml)
         {
@@ -55,6 +57,11 @@ namespace Nintendo.Byml.Parser
                 byml.RootNode = ParseNode(root);
 
             ReferenceNodes.Clear();
+
+            if (ContainsEmbedded)
+            {
+                byml.SetEmbedded(EmbeddedFiles);
+            }
 
             return byml;
         }
@@ -148,6 +155,14 @@ namespace Nintendo.Byml.Parser
             {
                 return new BymlNode(Crc32.Compute(value).ToString("x"));
             }
+            else if (tag == "!e")
+            {
+                ContainsEmbedded = true;
+                byte[] data = Convert.FromBase64String(value);
+                BymlNode newnode = new BymlNode(data, true);
+                EmbeddedFiles.Add(newnode, data);
+                return newnode;
+            }
             else
             {
                 if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
@@ -207,6 +222,11 @@ namespace Nintendo.Byml.Parser
                     }
                     yamlNode.Add(keyNode, SaveNode(item));
                 }
+                return yamlNode;
+            }
+            else if (node.Type == NodeType.Embeded)
+            {
+                var yamlNode = new YamlScalarNode() { Tag = "!e", Value = Convert.ToBase64String(node.Binary) };
                 return yamlNode;
             }
             else
@@ -300,5 +320,22 @@ namespace Nintendo.Byml.Parser
 
         private static string FormatFloat(float f) => $"{f:0.0########}";
         private static string FormatDouble(double d) => $"{d:0.0########}";
+
+        private static string ByteArrayToString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
+        }
+
+        private static byte[] StringToByteArray(string hex)
+        {
+            int NumberChars = hex.Length;
+            byte[] bytes = new byte[NumberChars / 2];
+            for (int i = 0; i < NumberChars; i += 2)
+                bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
+            return bytes;
+        }
     }
 }

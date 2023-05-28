@@ -62,6 +62,8 @@ namespace Nintendo.Byml
         public BymlNode RootNode { get; set; }
         public bool SupportPaths { get; set; } = false;
         public ushort Version { get; set; } = 7;
+        public static bool ContainsEmbedded { get; set; } = false;
+        public static Dictionary<BymlNode, byte[]> EmbeddedFiles { get; set; } = new Dictionary<BymlNode, byte[]>();
 
         #endregion
 
@@ -81,6 +83,14 @@ namespace Nintendo.Byml
         public void WriteYaml(string fileName) => File.WriteAllText(fileName, ToYaml());
 
         public void SetVersion(ushort version) => Version = version;
+        public void SetEmbedded(Dictionary<BymlNode, byte[]> files)
+        {
+            ContainsEmbedded = true; 
+            EmbeddedFiles = files;
+        }
+        public bool GetEmbedded() { return ContainsEmbedded; }
+        public Dictionary<BymlNode, byte[]> GetEmbeddedFiles() { return EmbeddedFiles; }
+
         #endregion
 
         // 

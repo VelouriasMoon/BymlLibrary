@@ -36,10 +36,14 @@ namespace Nintendo.Byml
             union.String = str;
             type = NodeType.String;
         }
-        public BymlNode(byte[] bytes)
+        public BymlNode(byte[] bytes, bool Embbeded = false)
         {
             union.Binary = bytes;
-            type = NodeType.Binary;
+            if (Embbeded)
+                type = NodeType.Embeded;
+            else
+                type = NodeType.Binary;
+
         }
         public BymlNode(List<BymlNode> array)
         {

@@ -42,6 +42,17 @@ namespace Nintendo.Byml.IO
                     context.WriteStringTable(context.Strings);
                 }
 
+                if (byml.GetEmbedded())
+                {
+                    context.Writer.Align(0x1000);
+                    context.EmbedPos = context.Writer.Position;
+                    context.EmbedCount = byml.GetEmbeddedFiles().Count();
+                    foreach (var file in byml.GetEmbeddedFiles())
+                    {
+                        context.Writer.WriteBytes(file.Value);
+                    }
+                }
+
                 context.Writer.WriteAt(12u, (uint)context.Writer.Position);
                 context.Writer.Align(4);
                 context.WriteContainerNode(byml.RootNode);
@@ -59,6 +70,10 @@ namespace Nintendo.Byml.IO
         private StringTable hash_key_table;
         private StringTable string_table;
         private Dictionary<BymlNode, uint> non_inline_node_data = new();
+        public int EmbedCount = 0;
+        public long EmbedPos = 0;
+        public int EmbedIndex = 0;
+        public int EmbedWritten = 0;
         public BinaryStream Writer { get; set; }
         public StringTable HashKeys { get => hash_key_table; }
         public StringTable Strings { get => string_table; }
@@ -147,6 +162,15 @@ namespace Nintendo.Byml.IO
                     break;
                 case NodeType.Double:
                     Writer.WriteDouble(node.Double);
+                    break;
+                case NodeType.Embeded:
+                    long pos = Writer.Position;
+                    Writer.WriteUInt32((uint)(EmbedPos - ((EmbedCount - EmbedIndex) * 8)));
+                    Writer.Position = EmbedPos - ((EmbedCount - EmbedIndex) * 8);
+                    Writer.WriteInt32(node.Binary.Length);
+                    Writer.WriteUInt32((uint)(EmbedPos + EmbedWritten));
+                    EmbedWritten += node.Binary.Length;
+                    Writer.Position = pos + 4;
                     break;
                 default:
                     throw new InvalidDataException($"{node.Type} is not a value node!");

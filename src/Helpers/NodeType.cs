@@ -8,6 +8,7 @@
         None,
         String = 0xA0,
         Binary = 0xA1,
+        Embeded = 0xA2,
         Array = 0xC0,
         Hash = 0xC1,
         StringArray = 0xC2,
