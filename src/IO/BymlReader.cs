@@ -31,8 +31,8 @@ namespace Nintendo.Byml.IO
 
                 // Get BYML version
                 Version = reader.ReadUInt16();
-                if (Version < 2 || Version > 4)
-                    throw new BymlException($"Unexpected version {Version}");
+                //if (Version < 2 || Version > 4)
+                //    throw new BymlException($"Unexpected version {Version}");
 
                 // Read the name array, holding strings referenced by index for the names of other nodes.
                 uint offset = reader.ReadUInt32();

@@ -61,7 +61,7 @@ namespace Nintendo.Byml
         public Endian Endianness { get; set; } = Endian.Little;
         public BymlNode RootNode { get; set; }
         public bool SupportPaths { get; set; } = false;
-        public ushort Version { get; set; } = 2;
+        public ushort Version { get; set; } = 7;
 
         #endregion
 
@@ -80,6 +80,7 @@ namespace Nintendo.Byml
         public void WriteXml(string fileName) => File.WriteAllText(fileName, ToXml());
         public void WriteYaml(string fileName) => File.WriteAllText(fileName, ToYaml());
 
+        public void SetVersion(ushort version) => Version = version;
         #endregion
 
         // 

@@ -14,8 +14,8 @@ namespace Nintendo.Byml.IO
             byte[] bytes;
             using (BinaryStream stream = new(new MemoryStream(), ByteConverter.GetConverter(byml.Endianness), encoding))
             {
-                if (byml.Version < 2 || byml.Version > 4)
-                    throw new InvalidDataException($"Invalid BYML version {byml.Version}");
+                //if (byml.Version < 2 || byml.Version > 4)
+                //    throw new InvalidDataException($"Invalid BYML version {byml.Version}");
 
                 WriteContext context = new(byml.RootNode) { Writer = stream };
 
