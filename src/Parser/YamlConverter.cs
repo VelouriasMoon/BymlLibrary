@@ -127,19 +127,22 @@ namespace Nintendo.Byml.Parser
             }
             else if (tag == "!u")
             {
-                return new BymlNode(uint.Parse(value, CultureInfo.InvariantCulture));
+                return new BymlNode(Convert.ToUInt32(value, 16));
             }
             else if (tag == "!d")
             {
-                return new BymlNode(double.Parse(value, CultureInfo.InvariantCulture));
+                if (double.TryParse(value, out double outvalue))
+                    return new BymlNode(outvalue);
             }
             else if (tag == "!ul")
             {
-                return new BymlNode(ulong.Parse(value, CultureInfo.InvariantCulture));
+                if (ulong.TryParse(value, out ulong outvalue))
+                    return new BymlNode(outvalue);
             }
             else if (tag == "!l")
             {
-                return new BymlNode(long.Parse(value, CultureInfo.InvariantCulture));
+                if (long.TryParse(value, out long outvalue))
+                    return new BymlNode(outvalue);
             }
             else if (tag == "!h")
             {
